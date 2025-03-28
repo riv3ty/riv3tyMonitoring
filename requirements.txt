@@ -1,6 +1,0 @@
-flask==2.3.3
-psutil==5.9.5
-requests==2.31.0
-flask-socketio==5.3.6
-python-engineio==4.8.0
-python-socketio==5.10.0
