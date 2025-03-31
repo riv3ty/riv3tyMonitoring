@@ -1,0 +1,14 @@
+{
+    "display": {
+        "show_disk": true,
+        "show_ram": true,
+        "show_cpu": true,
+        "show_temp": true,
+        "show_status": true
+    },
+    "theme": {
+        "dark_mode": true,
+        "accent_color": "#546373"
+    },
+    "refresh_rate": 5
+}
