@@ -5,8 +5,17 @@ services:
     build: .
     container_name: riv3ty-monitoring
     ports:
-      - "5001:5001"
+      - "0.0.0.0:5001:5001"  # Explicitly bind to all interfaces
     volumes:
       - ./instance:/app/instance
       - ./telegram_config.py:/app/telegram_config.py
+    environment:
+      - PYTHONUNBUFFERED=1    # Enable real-time logging
+      - TZ=Europe/Berlin       # Set timezone
     restart: unless-stopped
+    networks:
+      - monitoring-net
+
+networks:
+  monitoring-net:
+    driver: bridge

@@ -78,9 +78,18 @@ if [ ! -f "telegram_config.py" ]; then
     echo -e "You can edit it using: nano telegram_config.py"
 fi
 
+# Configure firewall if UFW is installed
+if command_exists ufw; then
+    echo -e "${YELLOW}Configuring firewall...${NC}"
+    ufw allow 5001/tcp comment 'Riv3ty Monitoring'
+    ufw reload
+fi
+
 # Start the server
 echo -e "${GREEN}Starting Riv3ty Monitoring server...${NC}"
-docker-compose up -d
+docker-compose down  # Stop any existing containers
+docker-compose pull  # Pull latest images
+docker-compose up -d # Start containers
 
 # Create systemd service for auto-start
 echo -e "${GREEN}Creating systemd service for auto-start...${NC}"

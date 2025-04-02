@@ -153,4 +153,5 @@ if __name__ == '__main__':
     # Start the agent status checker in a background thread
     status_checker = Thread(target=check_agent_status, daemon=True)
     status_checker.start()
-    socketio.run(app, host='0.0.0.0', port=5001, debug=True)
+    # Allow connections from any IP and disable debug mode in production
+    socketio.run(app, host='0.0.0.0', port=5001, debug=False, allow_unsafe_werkzeug=True)
