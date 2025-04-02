@@ -111,8 +111,15 @@ def handle_metrics_update(data):
         'timestamp': timestamp
     }
     
-    # Check for status changes and send notifications if needed
-    notifier.notify_status_change(hostname, status, timestamp)
+    # Extract metrics for resource monitoring
+    metrics = {
+        'ram': data.get('ram', {}),
+        'cpu': data.get('cpu', {}),
+        'disk_usage': data.get('disk_usage', {})
+    }
+    
+    # Check for status changes and resource usage
+    notifier.notify_status_change(hostname, status, timestamp, metrics)
     
     # Emit the update to all clients
     socketio.emit('metrics_update', {'agents': [data]})

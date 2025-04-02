@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  monitoring-server:
+    build: .
+    container_name: riv3ty-monitoring
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./instance:/app/instance
+      - ./telegram_config.py:/app/telegram_config.py
+    restart: unless-stopped
