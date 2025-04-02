@@ -8,7 +8,7 @@
     },
     "theme": {
         "dark_mode": true,
-        "accent_color": "#546373"
+        "accent_color": "#bb00ff"
     },
     "refresh_rate": 5
 }

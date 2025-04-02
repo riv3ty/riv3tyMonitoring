@@ -6,7 +6,7 @@ from datetime import datetime
 
 sio = socketio.Client()
 
-def get_system_metrics():
+def get_system_metrics(online_status=None):
     # Get disk usage
     disk = psutil.disk_usage('/')
     disk_total = round(disk.total / (1024**3), 2)  # Convert to GB
@@ -33,7 +33,7 @@ def get_system_metrics():
     return {
         "hostname": platform.node(),
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "online": True,
+        "online": online_status if online_status is not None else connection_status.get('connected', False),
         "disk_usage": {
             "total": disk_total,
             "used": disk_used,
@@ -51,25 +51,57 @@ def get_system_metrics():
         }
     }
 
+# Track connection status
+connection_status = {'connected': False}
+
 @sio.event
 def connect():
+    connection_status['connected'] = True
     print('Connected to server')
+    # Send initial metrics with online status
+    metrics = get_system_metrics()
+    sio.emit('metrics_update', metrics)
 
 @sio.event
 def disconnect():
+    connection_status['connected'] = False
     print('Disconnected from server')
+    # Try to send offline status
+    try:
+        metrics = get_system_metrics()
+        metrics['online'] = False
+        sio.emit('metrics_update', metrics)
+    except:
+        pass
 
 def main():
-    try:
-        sio.connect('http://100.104.69.66:5001')
-        while True:
-            metrics = get_system_metrics()
-            sio.emit('metrics_update', metrics)
-            time.sleep(5)
-    except Exception as e:
-        print(f"Error: {e}")
-        if sio.connected:
-            sio.disconnect()
+    while True:
+        try:
+            print('Connecting to server...')
+            sio.connect('http://100.104.69.66:5001')
+            
+            # Main loop - send metrics every 5 seconds
+            while True:
+                try:
+                    metrics = get_system_metrics()
+                    sio.emit('metrics_update', metrics)
+                    time.sleep(5)
+                except Exception as e:
+                    print(f"Error sending metrics: {e}")
+                    break
+                    
+        except Exception as e:
+            print(f"Connection error: {e}")
+        
+        finally:
+            if sio.connected:
+                try:
+                    sio.disconnect()
+                except:
+                    pass
+        
+        print('Retrying in 5 seconds...')
+        time.sleep(5)
 
 if __name__ == '__main__':
     main()

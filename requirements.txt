@@ -6,3 +6,4 @@ python-socketio==5.10.0
 flask-login==0.6.2
 flask-sqlalchemy==3.0.3
 werkzeug==2.3.7
+python-telegram-bot==20.8

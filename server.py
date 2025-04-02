@@ -2,8 +2,12 @@ from flask import Flask, render_template, jsonify, request, redirect, url_for, f
 from flask_socketio import SocketIO
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from models import db, User
+from notifications import TelegramNotifier
 import json
 import os
+import time
+from threading import Thread
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this to a secure secret key
@@ -16,6 +20,10 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 socketio = SocketIO(app, cors_allowed_origins='*')
+notifier = TelegramNotifier()
+
+# Store last heartbeat time for each agent
+agent_heartbeats = {}
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -91,7 +99,38 @@ def update_settings():
 
 @socketio.on('metrics_update')
 def handle_metrics_update(data):
+    # Get hostname and status from the data
+    hostname = data.get('hostname')
+    timestamp = data.get('timestamp')
+    
+    # Update heartbeat time
+    agent_heartbeats[hostname] = datetime.now()
+    
+    status = {
+        'online': True,  # If we receive an update, the agent is online
+        'timestamp': timestamp
+    }
+    
+    # Check for status changes and send notifications if needed
+    notifier.notify_status_change(hostname, status, timestamp)
+    
+    # Emit the update to all clients
     socketio.emit('metrics_update', {'agents': [data]})
+
+def check_agent_status():
+    while True:
+        current_time = datetime.now()
+        for hostname, last_heartbeat in list(agent_heartbeats.items()):
+            # If no heartbeat for more than 15 seconds, consider agent offline
+            if current_time - last_heartbeat > timedelta(seconds=15):
+                # Mark agent as offline
+                status = {
+                    'online': False,
+                    'timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S')
+                }
+                notifier.notify_status_change(hostname, status, status['timestamp'])
+                del agent_heartbeats[hostname]  # Remove from tracking
+        time.sleep(5)  # Check every 5 seconds
 
 def create_admin_user():
     with app.app_context():
@@ -104,4 +143,7 @@ def create_admin_user():
 
 if __name__ == '__main__':
     create_admin_user()
+    # Start the agent status checker in a background thread
+    status_checker = Thread(target=check_agent_status, daemon=True)
+    status_checker.start()
     socketio.run(app, host='0.0.0.0', port=5001, debug=True)

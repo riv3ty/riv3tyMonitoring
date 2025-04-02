@@ -1,0 +1,2 @@
+TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE'  # Get from @BotFather
+TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID_HERE'  # Your Telegram chat ID
