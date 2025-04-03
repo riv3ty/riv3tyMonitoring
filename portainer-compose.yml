@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  riv3ty-monitoring:
+    image: ghcr.io/riv3ty/riv3tymonitoring:latest  # We'll set this up in a moment
+    container_name: riv3ty-monitoring
+    ports:
+      - "5001:5001"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}  # Set in Portainer
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}      # Set in Portainer
+      - TZ=Europe/Berlin
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - riv3ty_data:/app/instance  # Persistent data
+    restart: unless-stopped
+    networks:
+      - riv3ty-net
+
+networks:
+  riv3ty-net:
+    driver: bridge
+
+volumes:
+  riv3ty_data:
+    driver: local
