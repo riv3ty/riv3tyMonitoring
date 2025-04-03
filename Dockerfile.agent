@@ -1,0 +1,25 @@
+# Use Python 3.9 slim image
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install required packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy only the agent-related files
+COPY requirements.txt .
+COPY agent.py .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD ps aux | grep "[p]ython agent.py" || exit 1
+
+# Run the agent
+CMD ["python", "agent.py"]

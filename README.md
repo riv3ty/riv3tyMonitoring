@@ -78,7 +78,36 @@ docker-compose up -d
 
 ## Agent Installation
 
-1. Install the agent package on each machine you want to monitor:
+### Option 1: Using Portainer (Recommended)
+
+1. In Portainer, go to "Stacks" and click "Add stack"
+
+2. Enter a name for your stack (e.g., "riv3ty-agent")
+
+3. Copy and paste the following Docker Compose configuration:
+```yaml
+version: '3.8'
+
+services:
+  riv3ty-agent:
+    image: ghcr.io/riv3ty/riv3tymonitoring-agent:latest
+    container_name: riv3ty-agent
+    environment:
+      - SERVER_URL=http://your_server_ip:5001  # Replace with your server IP
+      - TZ=Europe/Berlin
+      - HOSTNAME=${HOSTNAME:-unknown}
+    restart: unless-stopped
+    pid: host
+    privileged: true
+```
+
+4. Replace `your_server_ip` with the IP address of your monitoring server
+
+5. Click "Deploy the stack"
+
+### Option 2: Using pip (Traditional)
+
+1. Install the agent package:
 ```bash
 # From PyPI (recommended)
 pip install riv3ty-monitoring-agent

@@ -74,11 +74,16 @@ def disconnect():
     except:
         pass
 
+def get_server_url():
+    # Get server URL from environment variable or use default
+    return os.environ.get('SERVER_URL', 'http://100.104.69.66:5001')
+
 def main():
+    server_url = get_server_url()
     while True:
         try:
-            print('Connecting to server...')
-            sio.connect('http://100.104.69.66:5001')
+            print(f'Connecting to server at {server_url}...')
+            sio.connect(server_url)
             
             # Main loop - send metrics every 5 seconds
             while True:

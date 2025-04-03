@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  riv3ty-agent:
+    image: ghcr.io/riv3ty/riv3tymonitoring-agent:latest
+    container_name: riv3ty-agent
+    environment:
+      - SERVER_URL=http://your_server_ip:5001  # Replace with your server IP
+      - TZ=Europe/Berlin
+      - HOSTNAME=${HOSTNAME:-unknown}  # Uses system hostname or 'unknown'
+    restart: unless-stopped
+    pid: host  # Allows monitoring of host system metrics
+    privileged: true  # Required for full system monitoring
