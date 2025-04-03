@@ -11,9 +11,68 @@ A system monitoring tool with real-time updates and Telegram notifications.
 - Docker support for server
 - Installable agent package
 
-## Server Installation
+## Installation
 
-### Option 1: Using Portainer (Recommended)
+### Option 1: Combined Server and Agent (Same Machine)
+
+1. In Portainer, go to "Stacks" and click "Add stack"
+
+2. Enter a name for your stack (e.g., "riv3ty-monitoring")
+
+3. Copy and paste the following Docker Compose configuration:
+```yaml
+version: '3.8'
+
+services:
+  riv3ty-server:
+    image: ghcr.io/riv3ty/riv3tymonitoring:latest
+    container_name: riv3ty-monitoring
+    ports:
+      - "5001:5001"
+    environment:
+      - TELEGRAM_BOT_TOKEN=your_bot_token_here
+      - TELEGRAM_CHAT_ID=your_chat_id_here
+      - TZ=Europe/Berlin
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - riv3ty_data:/app/instance
+    restart: unless-stopped
+    networks:
+      - riv3ty-net
+
+  riv3ty-agent:
+    image: ghcr.io/riv3ty/riv3tymonitoring-agent:latest
+    container_name: riv3ty-agent
+    environment:
+      - SERVER_URL=http://riv3ty-server:5001
+      - TZ=Europe/Berlin
+      - HOSTNAME=docker-host
+    restart: unless-stopped
+    pid: host
+    privileged: true
+    depends_on:
+      - riv3ty-server
+    networks:
+      - riv3ty-net
+
+networks:
+  riv3ty-net:
+    driver: bridge
+
+volumes:
+  riv3ty_data:
+    driver: local
+```
+
+4. Replace the environment variables:
+   - `TELEGRAM_BOT_TOKEN`: Your Telegram bot token from @BotFather
+   - `TELEGRAM_CHAT_ID`: Your Telegram chat ID
+
+5. Click "Deploy the stack"
+
+This will start both the server and an agent to monitor the host system.
+
+### Option 2: Server Only Installation (Recommended for Multiple Agents)
 
 1. In Portainer, go to "Stacks" and click "Add stack"
 

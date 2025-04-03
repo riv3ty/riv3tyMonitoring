@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  riv3ty-server:
+    image: ghcr.io/riv3ty/riv3tymonitoring:latest
+    container_name: riv3ty-monitoring
+    ports:
+      - "5001:5001"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - TZ=Europe/Berlin
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - riv3ty_data:/app/instance
+    restart: unless-stopped
+    networks:
+      - riv3ty-net
+
+  riv3ty-agent:
+    image: ghcr.io/riv3ty/riv3tymonitoring-agent:latest
+    container_name: riv3ty-agent
+    environment:
+      - SERVER_URL=http://riv3ty-server:5001  # Verwendet den Service-Namen als Hostname
+      - TZ=Europe/Berlin
+      - HOSTNAME=docker-host
+    restart: unless-stopped
+    pid: host
+    privileged: true
+    depends_on:
+      - riv3ty-server
+    networks:
+      - riv3ty-net
+
+networks:
+  riv3ty-net:
+    driver: bridge
+
+volumes:
+  riv3ty_data:
+    driver: local
