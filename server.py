@@ -97,8 +97,17 @@ def update_settings():
     socketio.emit('settings_update', settings)
     return jsonify({"status": "success"})
 
+@socketio.on('connect')
+def handle_connect():
+    print(f'Client connected from {request.remote_addr}')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f'Client disconnected from {request.remote_addr}')
+
 @socketio.on('metrics_update')
 def handle_metrics_update(data):
+    print(f'Received metrics update: {data}')
     # Get hostname and status from the data
     hostname = data.get('hostname')
     timestamp = data.get('timestamp')

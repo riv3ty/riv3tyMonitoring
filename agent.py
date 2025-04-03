@@ -81,18 +81,26 @@ def get_server_url():
 
 def main():
     server_url = get_server_url()
+    print(f'Starting agent with configuration:')
+    print(f'Server URL: {server_url}')
+    print(f'Hostname: {platform.node()}')
+    
     while True:
         try:
-            print(f'Connecting to server at {server_url}...')
+            print(f'Attempting to connect to server at {server_url}...')
             sio.connect(server_url)
+            print('Successfully connected to server!')
             
             # Main loop - send metrics every 5 seconds
             while True:
                 try:
                     metrics = get_system_metrics()
+                    print(f'Sending metrics update: {metrics}')
                     sio.emit('metrics_update', metrics)
+                    print('Metrics sent successfully')
                     time.sleep(5)
                 except Exception as e:
+                    print(f'Error sending metrics: {str(e)}')
                     print(f"Error sending metrics: {e}")
                     break
                     
