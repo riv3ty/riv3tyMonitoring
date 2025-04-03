@@ -2,6 +2,7 @@ import psutil
 import time
 import socketio
 import platform
+import os
 from datetime import datetime
 
 sio = socketio.Client()
@@ -76,7 +77,7 @@ def disconnect():
 
 def get_server_url():
     # Get server URL from environment variable or use default
-    return os.environ.get('SERVER_URL', 'http://100.104.69.66:5001')
+    return os.environ.get('SERVER_URL', 'http://100.97.212.115:5001')
 
 def main():
     server_url = get_server_url()
